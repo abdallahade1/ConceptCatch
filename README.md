@@ -1,0 +1,2 @@
+# ConceptCatch
+ConceptCatch is an adaptive AI learning assistant that transforms mistakes into opportunities for learning. It analyzes student answers to identify why they are wrong, reteach the concept in plain language, and g track mistakes over time. Teachers and students can can use it to create custom quizzes and problem sets on any topic and difficulty level.
