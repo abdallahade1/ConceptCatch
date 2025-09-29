@@ -12,7 +12,8 @@ unstructured
 numpy
 pandas
 
-streamlit
+fastapi
+uvicorn
 flask
 sqlalchemy
 
