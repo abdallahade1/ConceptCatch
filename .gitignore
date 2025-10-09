@@ -1,1 +1,30 @@
-venv
+# Python cache and build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+*.db
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+
+# Data folders
+data/uploads/
+data/faiss_index/
+data/quizzes/
+
+# Node & Frontend (ignore in backend repo)
+../frontend/node_modules/
+../frontend/dist/
+../temp-vite/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
