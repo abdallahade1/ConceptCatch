@@ -5,6 +5,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import List
+import document_processing as dp
 
 # === Environment Setup ===
 load_dotenv()
@@ -46,27 +47,39 @@ feedback_prompt = ChatPromptTemplate.from_messages([
      - For procedural mistakes: reteach the correct process.
      - For careless or misinterpretation mistakes: clarify the specific misunderstanding.
      - Always teach in an encouraging, student-friendly tone.
-     
+     - Consider the subject ({subject}) when determining correctness, but do not downgrade an answer from partially correct to wrong unless it is completely incorrect.
+     - If a resource is provided (not "[None]"), use it to evaluate the answer; otherwise, evaluate using general knowledge.
+
      Return ONLY valid JSON following this structure:
     {format_instructions}"""
     ),
     ("user", 
-     "Question: {question}\n Student Answer: {student_answer}")
+     "Question: {question}\nStudent Answer: {student_answer}\nSubject: {subject}\nResource(optional): {resource_text}"
+    )
     ], 
 )
 
 # === Feedback Generation Function ===
-def give_feedback(question, student_answer, source=None):
+def give_feedback(subject, question, student_answer, resource=None):
     chain = feedback_prompt | llm | parser
-    result = chain.invoke({
-        "question": question,
-        "student_answer": student_answer,
-        "format_instructions": format_instructions})
+
+    resource_text = resource if resource else "[None]"
+    inputs = {
+    "question": question,
+    "student_answer": student_answer,
+    "subject": subject,
+    "resource_text": resource_text,
+    "format_instructions": format_instructions
+    }
+
+    result = chain.invoke(inputs)
     return result
 
 
 # === Intial Test for The Feature ===
-Q = "What is the time complexity of inserting an element into a binary search tree (BST) in the average case?"
-Ans = "The time complexity is O(log n) in all cases."
-response = give_feedback(Q, Ans)
+q = "In the TCP/IP protocol suite, what is the main function of the Transport Layer?"
+ans = "The Transport Layer is responsible for determining the physical path that data takes across the network."
+subject = "Computer Networks"
+#resource_text  = dp.extract_text("file_path")
+response = give_feedback(subject, q, ans)
 print(response)
