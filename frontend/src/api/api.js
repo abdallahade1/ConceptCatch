@@ -31,3 +31,9 @@ export const getStudentProfile = async (studentId) => {
   const res = await api.get(`/student/${studentId}/profile`);
   return res.data;
 };
+
+export async function getStudentProfile(studentId) {
+  const res = await fetch(`/api/students/${studentId}`);
+  if (!res.ok) throw new Error("Failed to fetch student profile");
+  return res.json();
+}
