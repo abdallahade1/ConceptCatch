@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from typing import List
 import document_processing as dp
 
-# === Environment Setup ===
+# === Importing Environment Variables ===
 load_dotenv()
 
 # === GPT5-mini Model Initialization ===
@@ -36,7 +36,9 @@ feedback_prompt = ChatPromptTemplate.from_messages([
      
      Your goals:
      1. Determine whether the student's answer is right, wrong, or partially correct.
-     2. If the answer is correct, briefly confirm and reinforce understanding.
+     2. If the answer is correct:
+        a. Briefly confirm and reinforce understanding.
+        b. Do not include any reteaching steps.
      3. If the answer is wrong or partially correct:
         a. Identify the mistake type (conceptual, procedural, careless, or misinterpretation).
         b. Explain clearly and kindly why the answer is incorrect or incomplete.
@@ -48,7 +50,7 @@ feedback_prompt = ChatPromptTemplate.from_messages([
      - For careless or misinterpretation mistakes: clarify the specific misunderstanding.
      - Always teach in an encouraging, student-friendly tone.
      - Consider the subject ({subject}) when determining correctness, but do not downgrade an answer from partially correct to wrong unless it is completely incorrect.
-     - If a resource is provided (not "[None]"), use it to evaluate the answer; otherwise, evaluate using general knowledge.
+     - If a resource is provided (not "[None]"), reference it when evaluating and explaining, while also using your own knowledge to enhance clarity. If no resource is provided, rely entirely on general knowledge.
 
      Return ONLY valid JSON following this structure:
     {format_instructions}"""
@@ -61,9 +63,14 @@ feedback_prompt = ChatPromptTemplate.from_messages([
 
 # === Feedback Generation Function ===
 def give_feedback(subject, question, student_answer, resource=None):
-    chain = feedback_prompt | llm | parser
-
-    resource_text = resource if resource else "[None]"
+    if resource:
+        resource_text = resource 
+        if dp.count_tokens(resource_text) > 1000:
+            resource_text = dp.get_relevant_resource_text(resource_text, question, student_answer)
+            print("!!!!! Large Document")
+    else: 
+        resource_text = "[None]"
+        
     inputs = {
     "question": question,
     "student_answer": student_answer,
@@ -72,14 +79,15 @@ def give_feedback(subject, question, student_answer, resource=None):
     "format_instructions": format_instructions
     }
 
+    chain = feedback_prompt | llm | parser
     result = chain.invoke(inputs)
     return result
 
 
-# === Intial Test for The Feature ===
-q = "In the TCP/IP protocol suite, what is the main function of the Transport Layer?"
-ans = "The Transport Layer is responsible for determining the physical path that data takes across the network."
-subject = "Computer Networks"
-#resource_text  = dp.extract_text("file_path")
-response = give_feedback(subject, q, ans)
+# === Intial Feature Running ===
+q = "What are the main advantages of using the Waterfall Model in software development?"
+ans = "“The Waterfall Model is easy to understand and manage because it follows a step-by-step process. It works well when project requirements are fixed and clearly defined. Each phase must be completed before moving to the next, which makes tracking progress and ensuring documentation much simpler.”"
+subject = "Software Engineering"
+resource_txt  = dp.extract_text("D:/College/6th Semester/Software Engineering/Lectures/Lec 2 Ch2 SW Processes Final.pdf")
+response = give_feedback(subject, q, ans, resource_txt)
 print(response)
