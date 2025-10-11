@@ -6,6 +6,12 @@ from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import List
 import document_processing as dp
+import uuid
+from typing import Dict
+from langchain.memory import ConversationBufferMemory
+import time
+from langchain.chains import LLMChain
+
 
 # === Importing Environment Variables ===
 load_dotenv()
@@ -19,7 +25,11 @@ llm = AzureChatOpenAI(
     # temperature = 0.0   # only temperature of 1 is supported in GPT5-mini
     )
 
-# === Stuctured Output Model ===
+# === LangChain Memory ===
+memory_store: Dict[str, ConversationBufferMemory] = {}
+user_sessions: Dict[str, str] = {}  
+
+# === Stuctured Feedback Model ===
 class Feedback(BaseModel):
     correctness: str = Field(description="right, wrong, or partially correct")
     mistake_type: str = Field(description="conceptual, procedural, careless, or misinterpretation")
@@ -61,8 +71,27 @@ feedback_prompt = ChatPromptTemplate.from_messages([
     ], 
 )
 
+def delete_previous_session(user_id):
+    previous_session = user_sessions.get(user_id)
+    if previous_session and previous_session in memory_store:
+        del memory_store[previous_session]
+
+def create_new_session(user_id, question, student_answer, resource_text, feedback):
+    session_id = str(uuid.uuid4())
+    memory = ConversationBufferMemory(return_messages=True)
+    memory.chat_memory.add_user_message(f"Question: {question}")
+    memory.chat_memory.add_user_message(f"Student Answer: {student_answer}")
+    memory.chat_memory.add_user_message(f"Resource: {resource_text}")
+    memory.chat_memory.add_ai_message(f"Tutor Feedback: {feedback}")
+
+    memory_store[session_id] = memory
+    user_sessions[user_id] = session_id
+    return session_id
+
 # === Feedback Generation Function ===
-def give_feedback(subject, question, student_answer, resource=None):
+def give_feedback(user_id, subject, question, student_answer, resource=None):
+    delete_previous_session(user_id)
+
     if resource:
         resource_text = resource 
         if dp.count_tokens(resource_text) > 1000:
@@ -78,16 +107,48 @@ def give_feedback(subject, question, student_answer, resource=None):
     "resource_text": resource_text,
     "format_instructions": format_instructions
     }
-
+    
     chain = feedback_prompt | llm | parser
-    result = chain.invoke(inputs)
-    return result
+    feedback = chain.invoke(inputs)
+    
+    session_id = create_new_session(user_id, question, student_answer, resource_text, feedback)
+
+    return feedback, session_id
+
+# === Follow-up Prompt Template ===
+followup_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     """You are a helpful tutor continuing a conversation with a student.
+    Use the previous question, student answer, tutor feedback, and resource if provided as context.
+    Answer the student's follow-up question clearly and kindly.
+    Be concise, structured, and easy to read."""),
+    ("user", "Followup_Question: {followup_question}")
+])
+
+# === Follow-up Question Function === 
+def answer_followup_question(session_id, followup_question):
+    memory = memory_store.get(session_id)
+    if not memory:
+        raise ValueError("No active session found. Please submit a new question first.")
+
+    chain = LLMChain(llm=llm, prompt=followup_prompt, memory=memory)
+    result = chain.invoke({"followup_question": followup_question})
+    
+    return result['text']
 
 
 # === Intial Feature Running ===
 q = "What are the main advantages of using the Waterfall Model in software development?"
-ans = "“The Waterfall Model is easy to understand and manage because it follows a step-by-step process. It works well when project requirements are fixed and clearly defined. Each phase must be completed before moving to the next, which makes tracking progress and ensuring documentation much simpler.”"
+ans = "“The Waterfall Model allow developers to accept changes at any time.”"
 subject = "Software Engineering"
-resource_txt  = dp.extract_text("D:/College/6th Semester/Software Engineering/Lectures/Lec 2 Ch2 SW Processes Final.pdf")
-response = give_feedback(subject, q, ans, resource_txt)
-print(response)
+# resource_txt  = dp.extract_text("file_path")
+response = give_feedback(subject, q, ans)
+session_id = response[1]
+print(response[0])
+
+print("\n\nFollow-up Q1")
+follow_q = "I don't understand the term plan-driven"
+print(answer_followup_question(session_id, follow_q))
+print("\n\nFollow-up Q2")
+follow_q2 = "Tell me more about Agile Practices"
+print(answer_followup_question(session_id, follow_q2))
