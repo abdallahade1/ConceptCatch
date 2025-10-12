@@ -9,7 +9,6 @@ import document_processing as dp
 import uuid
 from typing import Dict
 from langchain.memory import ConversationBufferMemory
-import time
 from langchain.chains import LLMChain
 
 
@@ -56,15 +55,18 @@ feedback_prompt = ChatPromptTemplate.from_messages([
 
      Guidance:
      - For conceptual mistakes: start by explaining the missing or misunderstood concept simply.
-    - For procedural mistakes: reteach the correct steps or process required to solve the problem.
-    - For reasoning mistakes: guide the student through the correct logical approach and problem-solving steps.
-    - For communication mistakes: help the student express their answer clearly and completely.
-    - For strategic mistakes: suggest a more effective approach or method for solving the problem.
-    - For careless mistakes: point out minor errors (e.g., arithmetic, typos) without discouraging the student.
-    - For misinterpretation mistakes: clarify what the question is asking and correct any misunderstanding.
+     - For procedural mistakes: reteach the correct steps or process required to solve the problem.
+     - For reasoning mistakes: guide the student through the correct logical approach and problem-solving steps.
+     - For communication mistakes: help the student express their answer clearly and completely.
+     - For strategic mistakes: suggest a more effective approach or method for solving the problem.
+     - For careless mistakes: point out minor errors (e.g., arithmetic, typos) without discouraging the student.
+     - For misinterpretation mistakes: clarify what the question is asking and correct any misunderstanding.
      - Always teach in an encouraging, student-friendly tone.
      - Consider the subject ({subject}) when determining correctness, but do not downgrade an answer from partially correct to wrong unless it is completely incorrect.
      - If a resource is provided (not "[None]"), reference it when evaluating and explaining, while also using your own knowledge to enhance clarity. If no resource is provided, rely entirely on general knowledge.
+     - After giving feedback, politely prompt the student that they may:
+        1. Ask a follow-up question for clarification, or
+        2. Request similar practice questions for more practice.
 
      Return ONLY valid JSON following this structure:
     {format_instructions}"""
@@ -75,11 +77,7 @@ feedback_prompt = ChatPromptTemplate.from_messages([
     ], 
 )
 
-def delete_previous_session(user_id):
-    previous_session = user_sessions.get(user_id)
-    if previous_session and previous_session in memory_store:
-        del memory_store[previous_session]
-
+# === Functions to manage User Sessions ===
 def create_new_session(user_id, question, student_answer, resource_text, feedback):
     session_id = str(uuid.uuid4())
     memory = ConversationBufferMemory(return_messages=True)
@@ -91,6 +89,11 @@ def create_new_session(user_id, question, student_answer, resource_text, feedbac
     memory_store[session_id] = memory
     user_sessions[user_id] = session_id
     return session_id
+
+def delete_previous_session(user_id):
+    previous_session = user_sessions.get(user_id)
+    if previous_session and previous_session in memory_store:
+        del memory_store[previous_session]
 
 # === Feedback Generation Function ===
 def give_feedback(user_id, subject, question, student_answer, resource=None):
@@ -119,21 +122,22 @@ def give_feedback(user_id, subject, question, student_answer, resource=None):
 
     return feedback, session_id
 
-# === Follow-up Prompt Template ===
-followup_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     """You are a helpful tutor continuing a conversation with a student.
-    Use the previous question, student answer, tutor feedback, and resource if provided as context.
-    Answer the student's follow-up question clearly and kindly.
-    Be concise, structured, and easy to read."""),
-    ("user", "Followup_Question: {followup_question}")
-])
-
 # === Follow-up Question Function === 
 def answer_followup_question(session_id, followup_question):
     memory = memory_store.get(session_id)
     if not memory:
         raise ValueError("No active session found. Please submit a new question first.")
+    
+    prev_question = memory.chat_memory.messages[0].content 
+    followup_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     f"""You are a helpful tutor continuing a conversation with a student.
+     Use the previous discussion (question, student answer, tutor feedback, and any provided resource) as **authoritative context**.
+     When the student requests practice questions, generate 3 similar practice questions based **only on the previous question: {prev_question}** by default, unless the student specifies a different number.
+     Answer the student's follow-up question clearly and kindly."""
+      ),
+    ("user", "Followup_Question: {followup_question}")
+    ])
 
     chain = LLMChain(llm=llm, prompt=followup_prompt, memory=memory)
     result = chain.invoke({"followup_question": followup_question})
@@ -142,18 +146,22 @@ def answer_followup_question(session_id, followup_question):
 
 
 # === Intial Feature Running ===
-q = "What are the main advantages of using the Waterfall Model in software development?"
-ans = "The Waterfall Model is better because it allows developers to easily go back and make changes at any stage of the process."
-subject = "Software Engineering"
+q = "Evaluate the integral: ∫₀¹ (3x² + 2x) dx"
+ans = "∫₀¹ (3x² + 2x) dx = [x³ + x²]₀¹ = 3"
+subject = "Calculus"
 # resource_txt  = dp.extract_text("file_path")
 fake_user_id = 243
 response = give_feedback(243, subject, q, ans)
 session_id = response[1]
 print(response[0])
 
-print("\n\nFollow-up Q1")
-follow_q = "I don't understand the term plan-driven"
+print("\nFollow-up 1")
+follow_q = "What integration rule used for this problem?"
 print(answer_followup_question(session_id, follow_q))
-print("\n\nFollow-up Q2")
-follow_q2 = "Tell me more about Agile Practices"
+print("\nFollowup 2")
+follow_q2 = "Generate Practice Questions"
 print(answer_followup_question(session_id, follow_q2))
+print("\nFollowup 3")
+follow_q3= "Generate 6 Practice Questions"
+print(answer_followup_question(session_id, follow_q3))
+
