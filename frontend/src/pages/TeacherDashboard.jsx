@@ -11,10 +11,8 @@ import {
   BarChart3,
   PlusCircle,
   Edit,
-  Share2,
   Download,
   AlertCircle,
-  ArrowRight,
   CheckCircle
 } from 'lucide-react'
 import { getTeacherDashboard, exportQuiz, publishQuiz } from '../lib/api'
@@ -180,24 +178,32 @@ const TeacherDashboard = () => {
                             Edit
                           </Link>
                         </Button>
+
                         {!quiz.is_published && (
                           <Button size="sm" onClick={() => handlePublish(quiz.id)}>
                             <CheckCircle className="w-4 h-4 mr-2" />
                             Publish
                           </Button>
                         )}
+
+                        {quiz.is_published && (
+                          <Button asChild size="sm">
+                            <Link to={`/quiz/${quiz.id}/take`}>
+                              <BookOpen className="w-4 h-4 mr-2" />
+                              View Quiz
+                            </Link>
+                          </Button>
+                        )}
+
                         <Button variant="secondary" size="sm" onClick={() => handleExport(quiz.id, 'docx')}>
                           <Download className="w-4 h-4 mr-2" />
                           Export DOCX
                         </Button>
+
                         <Button variant="secondary" size="sm" onClick={() => handleExport(quiz.id, 'json')}>
                           <Download className="w-4 h-4 mr-2" />
                           Export JSON
                         </Button>
-                        {/* <Button variant="ghost" size="sm" onClick={() => handleShare(quiz.id)}>
-                          <Share2 className="w-4 h-4 mr-2" />
-                          Share
-                        </Button> */}
                       </div>
                     </CardContent>
                   </Card>
@@ -215,33 +221,8 @@ const TeacherDashboard = () => {
           </CardContent>
         </Card>
       </section>
-
-      {/* Student Performance Overview (Placeholder) */}
-      <section className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Student Performance Overview
-            </CardTitle>
-            <CardDescription>
-              View overall performance of students across your quizzes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Detailed student performance analytics coming soon!</p>
-              <Button asChild variant="link" className="mt-4">
-                <Link to="/student/student_001/profile">View Sample Student Profile</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
     </div>
   )
 }
 
 export default TeacherDashboard
-

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -7,16 +7,13 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
-  CheckCircle,
-  XCircle,
-  Clock,
   Award,
-  Target,
-  BookOpen,
-  ArrowLeft,
-  ArrowRight,
+  Clock,
+  RefreshCcw,
   Lightbulb,
-  RefreshCcw
+  ArrowLeft,
+  Target,
+  AlertCircle,
 } from 'lucide-react'
 import { getAttemptDetails } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
@@ -26,6 +23,7 @@ const QuizResultsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, isStudent } = useAuth()
+  const [visibleExplanations, setVisibleExplanations] = useState({})
 
   const { data: attemptDetails, isLoading, error } = useQuery({
     queryKey: ['attemptDetails', attemptId],
@@ -33,8 +31,16 @@ const QuizResultsPage = () => {
     enabled: !!attemptId,
   })
 
-  const results = location.state?.results || attemptDetails?.attempt?.results
-  const quizTitle = attemptDetails?.attempt?.quiz_title || 'Quiz Results'
+  const results =
+    location.state?.results ||
+    attemptDetails?.attempt?.results ||
+    attemptDetails?.results ||
+    null
+
+  const quizTitle =
+    attemptDetails?.attempt?.quiz_title ||
+    attemptDetails?.quiz_title ||
+    'Quiz Results'
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -57,20 +63,21 @@ const QuizResultsPage = () => {
 
   if (error || !results) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto mt-10">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error?.response?.data?.detail || 'Failed to load quiz results.'}
+            {error?.response?.data?.detail ||
+              'Failed to load quiz results. Please try again later.'}
           </AlertDescription>
         </Alert>
       </div>
     )
   }
 
-  const score = results.score
-  const maxScore = results.max_score
-  const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0
+  const score = Number(results.score) || 0
+  const maxScore = Number(results.max_score) || 1
+  const percentage = Math.round((score / maxScore) * 100)
   const timeTaken = attemptDetails?.attempt?.time_taken || 0
 
   const formatTime = (seconds) => {
@@ -79,8 +86,12 @@ const QuizResultsPage = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const detailedResults = Array.isArray(results.detailed_results)
+    ? results.detailed_results
+    : []
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 p-4 sm:p-8">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-2">
@@ -88,7 +99,8 @@ const QuizResultsPage = () => {
           <h1 className="text-3xl font-bold">Quiz Results</h1>
         </div>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Review your performance for <span className="font-medium">{quizTitle}</span>.
+          Review your performance for{' '}
+          <span className="font-medium">{quizTitle}</span>.
         </p>
       </div>
 
@@ -122,47 +134,80 @@ const QuizResultsPage = () => {
       {/* Detailed Results */}
       <section className="space-y-6">
         <h2 className="text-2xl font-bold">Detailed Breakdown</h2>
-        {results.detailed_results.map((qResult, index) => (
-          <Card key={index} className={qResult.is_correct ? 'border-green-300' : 'border-red-300'}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Question {index + 1}
-              </CardTitle>
-              <Badge variant={qResult.is_correct ? 'success' : 'destructive'}>
-                {qResult.is_correct ? 'Correct' : 'Incorrect'}
-              </Badge>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-base leading-relaxed">{qResult.question_text}</p>
-              
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Your Answer:</p>
-                <p className={qResult.is_correct ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-                  {qResult.student_answer || 'No answer provided'}
-                </p>
-              </div>
+        {detailedResults.length === 0 ? (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              No detailed results available for this attempt.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          detailedResults.map((qResult, index) => (
+            <Card
+              key={index}
+              className={
+                qResult.is_correct ? 'border-green-300' : 'border-red-300'
+              }
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium">
+                  Question {index + 1}
+                </CardTitle>
+                <Badge variant={qResult.is_correct ? 'success' : 'destructive'}>
+                  {qResult.is_correct ? 'Correct' : 'Incorrect'}
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-base leading-relaxed">{qResult.question_text}</p>
 
-              {!qResult.is_correct && (
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Correct Answer:</p>
-                  <p className="text-green-600 font-medium">
-                    {qResult.correct_answer}
+                  <p className="text-sm text-muted-foreground">Your Answer:</p>
+                  <p
+                    className={
+                      qResult.is_correct
+                        ? 'text-green-600 font-medium'
+                        : 'text-red-600 font-medium'
+                    }
+                  >
+                    {qResult.student_answer || 'No answer provided'}
                   </p>
                 </div>
-              )}
 
-              {qResult.explanation && (
+                {!qResult.is_correct && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Correct Answer:</p>
+                    <p className="text-green-600 font-medium">{qResult.correct_answer}</p>
+                  </div>
+                )}
+
+                {/* View Explanation Button */}
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Explanation:</p>
-                  <Alert className="bg-blue-50 border-blue-200 text-blue-800">
-                    <Lightbulb className="h-4 w-4 text-blue-600" />
-                    <AlertDescription>{qResult.explanation}</AlertDescription>
-                  </Alert>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setVisibleExplanations((prev) => ({
+                        ...prev,
+                        [index]: !prev[index],
+                      }))
+                    }
+                  >
+                    {visibleExplanations[index] ? 'Hide Explanation' : 'View Explanation'}
+                  </Button>
+
+                  {visibleExplanations[index] && (
+                    <Alert className="bg-blue-50 border-blue-200 text-blue-800 mt-2">
+                      <Lightbulb className="h-4 w-4 text-blue-600" />
+                      <AlertDescription>
+                        {qResult.explanation || 'No explanation provided.'}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </section>
 
       {/* Actions */}

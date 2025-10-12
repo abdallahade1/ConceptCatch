@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import './App.css'
 
+
 // Layout Components
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
@@ -17,6 +18,9 @@ import TeacherDashboard from './pages/TeacherDashboard'
 import QuizEditorPage from './pages/QuizEditorPage'
 import StudentProfile from './pages/StudentProfile'
 import LogIn from './pages/LogIn'
+import FeedbackPage from './pages/FeedbackPage'
+
+
 
 // Context
 import { AuthProvider } from './contexts/AuthContext'
@@ -56,6 +60,7 @@ function App() {
                     <Route path="/student/dashboard" element={<StudentDashboard />} />
                     <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
                     <Route path="/student/:id/profile" element={<StudentProfile />} />
+                    <Route path="/feedback" element={<FeedbackPage />} />
                   </Routes>
                 </div>
               </main>

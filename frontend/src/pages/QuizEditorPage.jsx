@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import {
   Edit,
   Save,
@@ -48,9 +49,9 @@ const QuizEditorPage = () => {
 
   useEffect(() => {
     if (data?.quiz) {
-      setQuizTitle(data.quiz.title)
-      setQuestions(data.quiz.questions)
-      setIsPublished(data.quiz.is_published)
+      setQuizTitle(data.quiz.title || '')
+      setQuestions(data.quiz.questions || []) // fallback to empty array
+      setIsPublished(data.quiz.is_published || false)
     }
   }, [data])
 
@@ -118,12 +119,24 @@ const QuizEditorPage = () => {
   }
 
   const handleRemoveQuestion = (index) => {
-    const newQuestions = questions.filter((_, i) => i !== index)
-    setQuestions(newQuestions)
+    setQuestions(questions.filter((_, i) => i !== index))
   }
 
   const handleSaveQuiz = () => {
-    updateQuizMutation.mutate({ questions: questions })
+    const payload = {
+      title: quizTitle,
+      is_published: isPublished,
+      questions: questions.map(q => ({
+        id: q.id, // keep the original id for existing questions
+        question: q.question,
+        question_type: q.question_type,
+        options: q.options,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation,
+      })),
+    }
+
+    updateQuizMutation.mutate(payload)
   }
 
   const handlePublish = () => {
@@ -233,8 +246,8 @@ const QuizEditorPage = () => {
       {/* Questions Editor */}
       <section className="space-y-6">
         <h2 className="text-2xl font-bold">Questions</h2>
-        {questions.map((q, qIndex) => (
-          <Card key={q.id || qIndex}>
+        {Array.isArray(questions) && questions.map((q, qIndex) => (
+          <Card key={q.id}>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Question {qIndex + 1}</CardTitle>
               <Button variant="destructive" size="sm" onClick={() => handleRemoveQuestion(qIndex)}>
@@ -246,7 +259,7 @@ const QuizEditorPage = () => {
                 <Label htmlFor={`question-${qIndex}`}>Question Text</Label>
                 <Textarea
                   id={`question-${qIndex}`}
-                  value={q.question}
+                  value={q.question || ''}
                   onChange={(e) => handleQuestionChange(qIndex, 'question', e.target.value)}
                   rows={3}
                 />
@@ -256,7 +269,7 @@ const QuizEditorPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor={`qType-${qIndex}`}>Question Type</Label>
                   <Select
-                    value={q.question_type}
+                    value={q.question_type || 'MCQ'}
                     onValueChange={(value) => handleQuestionChange(qIndex, 'question_type', value)}
                   >
                     <SelectTrigger id={`qType-${qIndex}`}>
@@ -274,20 +287,20 @@ const QuizEditorPage = () => {
                   <Label htmlFor={`correctAnswer-${qIndex}`}>Correct Answer</Label>
                   <Input
                     id={`correctAnswer-${qIndex}`}
-                    value={q.correct_answer}
+                    value={q.correct_answer || ''}
                     onChange={(e) => handleQuestionChange(qIndex, 'correct_answer', e.target.value)}
                     placeholder="Enter the correct answer"
                   />
                 </div>
               </div>
 
-              {(q.question_type === 'MCQ' || q.question_type === 'True/False') && (
+              {(q.question_type === 'MCQ' || q.question_type === 'True/False') && Array.isArray(q.options) && (
                 <div className="space-y-2">
                   <Label>Options</Label>
                   {q.options.map((option, oIndex) => (
-                    <div key={oIndex} className="flex items-center gap-2">
+                    <div key={`${q.id}-option-${oIndex}`} className="flex items-center gap-2">
                       <Input
-                        value={option}
+                        value={option || ''}
                         onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
                         placeholder={`Option ${oIndex + 1}`}
                       />
@@ -307,7 +320,7 @@ const QuizEditorPage = () => {
                 <Label htmlFor={`explanation-${qIndex}`}>Explanation (Optional)</Label>
                 <Textarea
                   id={`explanation-${qIndex}`}
-                  value={q.explanation}
+                  value={q.explanation || ''}
                   onChange={(e) => handleQuestionChange(qIndex, 'explanation', e.target.value)}
                   rows={3}
                   placeholder="Provide an explanation for the correct answer"

@@ -68,7 +68,7 @@ def init_db(db_path: str):
         is_correct BOOLEAN,
         points_earned REAL DEFAULT 0,
         max_points REAL DEFAULT 1,
-        response_time INTEGER, -- in seconds
+        response_time INTEGER, -- in seconds,
         FOREIGN KEY (attempt_id) REFERENCES quiz_attempts (id)
     );
 
@@ -107,7 +107,7 @@ def init_db(db_path: str):
     conn.close()
 
 
-# ---------------------- USER MANAGEMENT ----------------------
+#  USER MANAGEMENT 
 def create_user(db_path: str, user_id: str, name: str, email: str, role: str):
     """Create a new user."""
     conn = get_connection(db_path)
@@ -135,7 +135,7 @@ def get_user(db_path: str, user_id: str) -> Optional[Dict]:
     return dict(row) if row else None
 
 
-# ---------------------- QUIZ MANAGEMENT ----------------------
+#  QUIZ MANAGEMENT 
 def insert_quiz(db_path: str, quiz_data: Dict[str, Any], created_by: str) -> int:
     """Insert a new quiz and return its ID."""
     conn = get_connection(db_path)
@@ -232,7 +232,7 @@ def publish_quiz(db_path: str, quiz_id: int):
     conn.close()
 
 
-# ---------------------- QUIZ ATTEMPTS & RESPONSES ----------------------
+#  QUIZ ATTEMPTS & RESPONSES 
 def start_quiz_attempt(db_path: str, student_id: str, quiz_id: int) -> int:
     """Start a new quiz attempt and return attempt ID."""
     conn = get_connection(db_path)
@@ -329,7 +329,7 @@ def get_quiz_attempt_details(db_path: str, attempt_id: int) -> Dict:
     return attempt
 
 
-# ---------------------- STUDENT ANALYTICS ----------------------
+#  STUDENT ANALYTICS 
 def log_student_mistakes(db_path: str, student_id: str, mistakes: List[Dict]):
     """Log student mistakes from quiz responses."""
     conn = get_connection(db_path)

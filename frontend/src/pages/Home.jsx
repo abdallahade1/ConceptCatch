@@ -12,7 +12,8 @@ import {
   Zap,
   CheckCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  SearchCheck
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { PlusCircle } from "lucide-react"
@@ -21,9 +22,14 @@ const HomePage = () => {
   const { isAuthenticated, isTeacher, isStudent, user } = useAuth()
 
   const features = [
+    {icon: SearchCheck,
+    title: 'AI-Powered Feedback',
+    description: 'Receive personalized, step-by-step feedback on your answers with AI explanations and reteaching guidance.',
+    color: 'text-yellow-500'
+    },
     {
       icon: Brain,
-      title: 'AI-Powered Generation',
+      title: 'AI-Powered Quiz Generation',
       description: 'Generate intelligent quizzes using advanced AI that understands your content and creates relevant questions.',
       color: 'text-blue-500'
     },
@@ -48,6 +54,13 @@ const HomePage = () => {
   ]
 
   const quickActions = [
+    {
+      title: 'Get Feedback',
+      description: 'Receive detailed feedback and reteaching guidance on your answers',
+      icon: SearchCheck,
+      href: '/feedback',
+      color: 'bg-yellow-500'
+    },
     {
       title: 'Generate from Topic',
       description: 'Create a quiz by entering a topic or subject',
