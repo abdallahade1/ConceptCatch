@@ -49,7 +49,7 @@ def generate_quiz_from_document(file_path: str, num_questions: int,
     
     # Extract text from document
     content_text = extract_text(file_path)
-    
+    # print(content_text)
     if not content_text.strip():
         raise ValueError("No text content found in the document")
     

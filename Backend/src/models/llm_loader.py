@@ -27,7 +27,7 @@ class LLMModel:
             api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
         )
 
-    def generate_response(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
+    def generate_response(self, prompt: str, max_tokens: int = 5000, temperature: float = 0.7) -> str:
         """Generate a standard response using Azure OpenAI."""
         try:
             response = self.client.chat.completions.create(
@@ -41,7 +41,7 @@ class LLMModel:
             return "Error generating response"
 
     def generate_structured_response(self, prompt: str, response_format: Dict,
-                                 max_tokens: int = 1500) -> Dict:
+                                 max_tokens: int = 10000) -> Dict:
         """Generate a structured JSON response using Azure OpenAI."""
         structured_prompt = f"""
     {prompt}
@@ -66,30 +66,25 @@ class LLMModel:
                 return {"error": "No content returned"}
 
             content = response.choices[0].message.content
+        
             if not content:
                 print("[Warning] Empty content received from Azure LLM.")
                 print(f"[DEBUG] Full Azure response: {response}")
                 return {"error": "Empty response from model"}
 
             print(f"[DEBUG] Raw LLM output:\n{content}\n")
-
-            # Try to parse JSON robustly
-            try:
-                return json.loads(content)
-            except json.JSONDecodeError:
-                print("[Warning] Could not extract JSON object. Attempting regex extraction...")
-                match = re.search(r'\{.*\}', content, re.DOTALL)
-                if match:
-                    try:
-                        return json.loads(match.group(0))
-                    except Exception:
-                        pass
-                return {"raw_text": content.strip()}
-
+            
+            start = content.find("{")
+            end = content.rfind("}") + 1
+            json_text = content[start:end]
+            data = json.loads(json_text)
+            return data
+        
+        
         except Exception as e:
             print(f"[Azure LLM Error] {e}")
             return {"error": str(e)}
-
+        
 class QuizGenerator:
     """Enhanced quiz generator with improved prompting."""
     
@@ -137,17 +132,17 @@ class QuizGenerator:
         """Generate quiz from document content."""
         
         # First, summarize the document if it's too long
-        if len(content) > 3000:
-            summary_prompt = f"""
-Summarize the following document content, focusing on the key concepts, 
-facts, and important information that would be suitable for creating quiz questions:
+#         if len(content) > 3000:
+#             summary_prompt = f"""
+# Summarize the following document content, focusing on the key concepts, 
+# facts, and important information that would be suitable for creating quiz questions:
 
-{content[:3000]}...
+# {content[:3000]}...
 
-Provide a comprehensive summary that captures the main learning objectives.
-"""
-            content = self.llm.generate_response(summary_prompt, max_tokens=800)
-        
+# Provide a comprehensive summary that captures the main learning objectives.
+# """
+#             content = self.llm.generate_response(summary_prompt, max_tokens=5000)
+#             print(f"printed document content: {content}")
         response_format = {
             "title": "Document-based Quiz",
             "topic": "Extracted from document",

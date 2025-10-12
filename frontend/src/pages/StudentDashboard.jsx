@@ -66,9 +66,16 @@ const StudentDashboard = () => {
     )
   }
 
-  const studentProfile = profileData?.student
+  const studentProfile = profileData?.student || {}
   const analytics = profileData?.analytics || {}
   const attempts = attemptsData?.attempts || []
+
+  const renderStudentName = () => {
+    if (!studentProfile?.name) return 'Student'
+    return typeof studentProfile.name === 'object'
+      ? `${studentProfile.name.first || ''} ${studentProfile.name.last || ''}`.trim()
+      : String(studentProfile.name)
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
@@ -79,7 +86,7 @@ const StudentDashboard = () => {
           <h1 className="text-3xl font-bold">Student Dashboard</h1>
         </div>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Welcome back, <span className="font-medium">{studentProfile?.name || 'Student'}</span>! 
+          Welcome back, <span className="font-medium">{renderStudentName()}</span>! 
           Here's an overview of your learning progress.
         </p>
       </div>
@@ -105,7 +112,7 @@ const StudentDashboard = () => {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.total_quizzes_taken || 0}</div>
+            <div className="text-2xl font-bold">{Number(analytics.total_quizzes_taken || 0)}</div>
             <p className="text-xs text-muted-foreground">Total attempts</p>
           </CardContent>
         </Card>
@@ -116,7 +123,7 @@ const StudentDashboard = () => {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.common_mistakes?.length || 0}</div>
+            <div className="text-2xl font-bold">{Array.isArray(analytics.common_mistakes) ? analytics.common_mistakes.length : 0}</div>
             <p className="text-xs text-muted-foreground">Topics to review</p>
           </CardContent>
         </Card>
@@ -135,11 +142,11 @@ const StudentDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {analytics.common_mistakes && analytics.common_mistakes.length > 0 ? (
+            {Array.isArray(analytics.common_mistakes) && analytics.common_mistakes.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {analytics.common_mistakes.map((mistake, i) => (
                   <Badge key={i} variant="destructive" className="text-sm px-3 py-1">
-                    {mistake}
+                    {typeof mistake === 'object' ? JSON.stringify(mistake) : String(mistake)}
                   </Badge>
                 ))}
               </div>
@@ -170,29 +177,27 @@ const StudentDashboard = () => {
             {attempts.length > 0 ? (
               <div className="space-y-4">
                 {attempts.slice(0, 5).map((a) => (
-                  <Card key={a.attempt_id} className="hover:shadow-md transition-shadow">
+                  <Card key={String(a.attempt_id)} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">{a.quiz_title || 'Untitled Quiz'}</p>
+                        <p className="font-semibold">{typeof a.quiz_title === 'object' ? JSON.stringify(a.quiz_title) : String(a.quiz_title || 'Untitled Quiz')}</p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <CalendarDays className="w-3 h-3" />
-                          <span>{new Date(a.timestamp).toLocaleDateString()}</span>
+                          <span>{a.timestamp ? new Date(a.timestamp).toLocaleDateString() : 'N/A'}</span>
                           <Hash className="w-3 h-3" />
-                          <span>Attempt ID: {a.attempt_id}</span>
+                          <span>Attempt ID: {String(a.attempt_id)}</span>
                         </div>
                       </div>
                       <div className="text-right">
                         <Badge variant={a.score_percentage >= 70 ? 'success' : 'destructive'}>
-                          {typeof a.score_percentage === 'number'
-                            ? a.score_percentage.toFixed(1)
-                            : 'N/A'}%
+                          {typeof a.score_percentage === 'number' ? a.score_percentage.toFixed(1) : 'N/A'}%
                         </Badge>
                         <p className="text-sm text-muted-foreground">
-                          {a.score}/{a.max_score} points
+                          {Number(a.score || 0)}/{Number(a.max_score || 0)} points
                         </p>
                       </div>
                       <Button asChild variant="outline" size="sm">
-                        <Link to={`/quiz/${a.quiz_id}/results/${a.attempt_id}`}>
+                        <Link to={`/quiz/${String(a.quiz_id)}/results/${String(a.attempt_id)}`}>
                           View Details
                           <ArrowRight className="w-3 h-3 ml-2" />
                         </Link>
