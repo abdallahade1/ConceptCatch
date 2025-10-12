@@ -1,17 +1,13 @@
 # ConceptCatch
 
-**ConceptCatch** is an adaptive AI learning assistant that transforms mistakes into opportunities for learning.  
-It analyzes student answers to identify why they are wrong, reteaches the concept in plain language, and tracks mistakes over time.  
-Teachers and students can use it to create custom quizzes and problem sets on any topic and difficulty level.
+**ConceptCatch** is an adaptive AI learning assistant that transforms mistakes into opportunities for learning. It analyzes student answers to identify why they are wrong, reteaches the concept in plain language, and tracks mistakes over time. Teachers and students can use it to create custom quizzes and problem sets on any topic and difficulty level.
 
----
 
 ## Team Name: ConceptCatch
 - Abdallah Adel  
 - Shahd Ammar  
 - Yasmeen Saber  
 
----
 
 ## Project Features
 
@@ -38,12 +34,14 @@ Teachers and students can use it to create custom quizzes and problem sets on an
 - Generate targeted quizzes from a student’s mistake history.
 - Provide a teacher dashboard with detailed, exportable performance reports.
 
----
 
-## 🎥 Demo 
-Demo Link: *(https://drive.google.com/file/d/1fUZwDrOLXzDQiIDmgqYKSsLbZQ2OSp6V/view?usp=sharing)*
 
----
+## Demo 
+[Demo Link](https://drive.google.com/file/d/1fUZwDrOLXzDQiIDmgqYKSsLbZQ2OSp6V/view?usp=sharing)
+
+## Demonstration Video
+[Demonstration Video](https://drive.google.com/drive/folders/1lvuHRzAIKyeckyoDQPio73xL8vQrxgD9?usp=sharing)
+
 
 ## Environment Setup
 
@@ -65,7 +63,6 @@ pip install -r requirements.txt
 pip install openai langchain langchain-openai python-dotenv
 ```
 
----
 
 ## Running
 
@@ -81,22 +78,19 @@ cd backend
 uvicorn src.app:app --reload --port 8000
 ```
 
----
 
 ## GenAI Tools Used
 - **ChatGPT**
 
----
 
 ## Generative AI Usage Examples
 
 ### Example 1: Debugging LangChain Memory Error
 **Prompt Used:**
-> I'm using LangChain memory to remember the question, the student's previous answer, and the AI feedback when handling a follow-up question...
+I'm using LangChain memory to remember the question, the student's previous answer, and the AI feedback when handling a follow-up question. I want the LLM to be aware of the original question to generate similar practice questions if requested. I encountered the following error: *ValueError: One input key expected, got ['followup_format_instructions', 'prev_question']*. This happens when I include prev_question in the LLM chain.
 
 **AI Solution:**
-The AI explained that `ConversationBufferMemory` expects one input key and advised using an f-string instead of placeholder variables.  
-This resolved the multi-input key error and enabled dynamic prompt generation.
+The AI explained that `ConversationBufferMemory` expects one input key and advised using an f-string instead of placeholder variables. This resolved the multi-input key error and enabled dynamic prompt generation.
 
 ### Example 2: Debugging Asynchronous API Initialization and Environment Configuration in FastAPI
 
@@ -106,8 +100,6 @@ This resolved the multi-input key error and enabled dynamic prompt generation.
 - Move `load_dotenv()` before app initialization.  
 - Implement lazy initialization with `@lru_cache` to load AzureOpenAI clients only when needed.  
 - Add a startup event to verify environment configuration.
-
-**Outcome:** Backend successfully connected to Azure OpenAI and avoided async race conditions.
 
 ---
 
