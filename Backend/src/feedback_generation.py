@@ -32,7 +32,7 @@ user_sessions: Dict[str, str] = {}
 # === Stuctured Feedback Model ===
 class Feedback(BaseModel):
     correctness: str = Field(description="right, wrong, or partially correct")
-    mistake_type: str = Field(description="conceptual, procedural, careless, or misinterpretation")
+    mistake_type: str = Field(description="conceptual, procedural, reasoning, communication, strategic, careless, or misinterpretation")
     explanation: str = Field(description="Why the student's answer is incorrect or incomplete, in student-friendly language.")
     reteaching_steps: List[str] = Field(description="Step-by-step reteaching guidance including concept explanation if needed.")
 
@@ -50,14 +50,18 @@ feedback_prompt = ChatPromptTemplate.from_messages([
         a. Briefly confirm and reinforce understanding.
         b. Do not include any reteaching steps.
      3. If the answer is wrong or partially correct:
-        a. Identify the mistake type (conceptual, procedural, careless, or misinterpretation).
+        a. Identify the mistake type (conceptual, procedural, reasoning, communication, strategic, careless, or misinterpretation)"
         b. Explain clearly and kindly why the answer is incorrect or incomplete.
         c. Reteach both the **concept** and the **solution process** step-by-step, so the student learns how to solve the problem correctly from start to finish.
 
      Guidance:
      - For conceptual mistakes: start by explaining the missing or misunderstood concept simply.
-     - For procedural mistakes: reteach the correct process.
-     - For careless or misinterpretation mistakes: clarify the specific misunderstanding.
+    - For procedural mistakes: reteach the correct steps or process required to solve the problem.
+    - For reasoning mistakes: guide the student through the correct logical approach and problem-solving steps.
+    - For communication mistakes: help the student express their answer clearly and completely.
+    - For strategic mistakes: suggest a more effective approach or method for solving the problem.
+    - For careless mistakes: point out minor errors (e.g., arithmetic, typos) without discouraging the student.
+    - For misinterpretation mistakes: clarify what the question is asking and correct any misunderstanding.
      - Always teach in an encouraging, student-friendly tone.
      - Consider the subject ({subject}) when determining correctness, but do not downgrade an answer from partially correct to wrong unless it is completely incorrect.
      - If a resource is provided (not "[None]"), reference it when evaluating and explaining, while also using your own knowledge to enhance clarity. If no resource is provided, rely entirely on general knowledge.
@@ -139,10 +143,11 @@ def answer_followup_question(session_id, followup_question):
 
 # === Intial Feature Running ===
 q = "What are the main advantages of using the Waterfall Model in software development?"
-ans = "“The Waterfall Model allow developers to accept changes at any time.”"
+ans = "The Waterfall Model is better because it allows developers to easily go back and make changes at any stage of the process."
 subject = "Software Engineering"
 # resource_txt  = dp.extract_text("file_path")
-response = give_feedback(subject, q, ans)
+fake_user_id = 243
+response = give_feedback(243, subject, q, ans)
 session_id = response[1]
 print(response[0])
 
