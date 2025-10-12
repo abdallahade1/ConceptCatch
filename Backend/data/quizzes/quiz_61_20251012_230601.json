@@ -1,0 +1,79 @@
+{
+  "title": "Photosynthesis Quiz",
+  "topic": "Photosynthesis",
+  "difficulty": "Medium",
+  "questions": [
+    {
+      "id": "1",
+      "question": "Which of the following processes occurs primarily in the thylakoid membranes of chloroplasts during photosynthesis?",
+      "options": [
+        "A. Carbon dioxide fixation into 3‑carbon sugars (Calvin cycle)",
+        "B. Light-driven water splitting and ATP/NADPH production (light reactions)",
+        "C. Starch polymerization from triose phosphates",
+        "D. Conversion of glucose to pyruvate by glycolysis"
+      ],
+      "correct_answer": "B. Light-driven water splitting and ATP/NADPH production (light reactions)",
+      "explanation": "The thylakoid membranes host the photosystems, electron transport chain, and ATP synthase where light energy is used to split water (in Photosystem II), generate O2, and produce ATP and NADPH. The Calvin cycle (carbon fixation) occurs in the stroma, starch synthesis also occurs in the stroma or plastid stroma, and glycolysis occurs in the cytosol (or mitochondria in some steps), not in the thylakoid membranes.",
+      "points": 1
+    },
+    {
+      "id": "2",
+      "question": "A plant is grown under nearly monochromatic green light. Compared with plants grown under red or blue light of the same photon flux density, what is the most likely effect on its net photosynthetic rate and why?",
+      "options": [
+        "A. Net photosynthesis will be higher because green light penetrates deeper into leaves.",
+        "B. Net photosynthesis will be about the same because all pigments absorb green equally.",
+        "C. Net photosynthesis will be lower because chlorophylls absorb less green light, though some photosynthesis still occurs due to accessory pigments and scattering.",
+        "D. Net photosynthesis will cease entirely because green light cannot drive the light reactions."
+      ],
+      "correct_answer": "C. Net photosynthesis will be lower because chlorophylls absorb less green light, though some photosynthesis still occurs due to accessory pigments and scattering.",
+      "explanation": "Chlorophyll a and b absorb mainly blue and red wavelengths and reflect much of the green, so plants under green light typically have reduced absorption and lower net photosynthesis compared with red/blue light. However, photosynthesis does not cease entirely because carotenoids and chlorophyll in deeper tissues can absorb some green light, and light scattering within the leaf allows partial use of green photons.",
+      "points": 1
+    },
+    {
+      "id": "3",
+      "question": "Which statement best explains why C4 plants have an advantage over C3 plants under high temperature and low atmospheric CO2 conditions?",
+      "options": [
+        "A. C4 plants perform the Calvin cycle in chloroplasts while C3 plants perform it in mitochondria.",
+        "B. C4 plants use PEP carboxylase in mesophyll cells to concentrate CO2 in bundle sheath cells, reducing photorespiration.",
+        "C. C4 plants open stomata less because they do not need CO2 for photosynthesis.",
+        "D. C4 plants produce oxygen in the Calvin cycle, which increases internal O2 and improves Rubisco efficiency."
+      ],
+      "correct_answer": "B. C4 plants use PEP carboxylase in mesophyll cells to concentrate CO2 in bundle sheath cells, reducing photorespiration.",
+      "explanation": "C4 photosynthesis fixes CO2 first with PEP carboxylase in mesophyll cells to form a 4‑carbon compound that is transported to bundle sheath cells, where CO2 is released at a high local concentration for the Calvin cycle. This minimizes Rubisco oxygenation (photorespiration), which is favored at high temperatures and low CO2. The other options are incorrect: the Calvin cycle occurs in chloroplasts in both types; stomatal behavior is related but not the direct mechanism stated; and the Calvin cycle does not produce oxygen.",
+      "points": 1
+    },
+    {
+      "id": "4",
+      "question": "In an experiment, a leaf's photosynthetic rate increases as light intensity rises but plateaus beyond a certain light level. Which change is most likely to increase the plateau (maximum) photosynthetic rate under those same light conditions?",
+      "options": [
+        "A. Lowering ambient CO2 concentration while keeping light the same",
+        "B. Increasing ambient CO2 concentration while keeping light the same",
+        "C. Decreasing leaf temperature well below the optimum for enzyme activity",
+        "D. Removing all stomatal openings to prevent water loss"
+      ],
+      "correct_answer": "B. Increasing ambient CO2 concentration while keeping light the same",
+      "explanation": "When light is saturating, photosynthesis is limited by factors other than light—commonly CO2 availability or enzyme capacity. Raising CO2 concentration can increase the rate by providing more substrate for Rubisco and reducing photorespiration (especially at higher temperatures), thereby raising the plateau. Lowering CO2 or temperature, or removing stomata, would reduce CO2 availability or enzyme activity and lower photosynthesis.",
+      "points": 1
+    },
+    {
+      "id": "5",
+      "question": "A classic experiment uses isotopically labeled substrates to determine the source of the O2 released by photosynthesis. If a plant is supplied with CO2 labeled with 18O (C18O2) versus water labeled with 18O (H2(18)O), which labeled substrate will produce 18O2 and what does this demonstrate?",
+      "options": [
+        "A. C18O2 will produce 18O2, showing oxygen gas originates from carbon dioxide.",
+        "B. H2(18)O will produce 18O2, showing oxygen gas originates from water.",
+        "C. Both C18O2 and H2(18)O will produce 18O2 equally, showing oxygen comes from both sources.",
+        "D. Neither will produce 18O2 because oxygen gas comes from atmospheric O2, not from CO2 or H2O."
+      ],
+      "correct_answer": "B. H2(18)O will produce 18O2, showing oxygen gas originates from water.",
+      "explanation": "Experiments using H2(18)O demonstrated that the O2 released by photosynthesis contains the oxygen from water, not from CO2. Water splitting by Photosystem II provides the oxygen atoms that combine to form O2. Labeling CO2 does not label the released O2, which disproved the idea that O2 comes from CO2 and clarified the mechanism of the light reactions.",
+      "points": 1
+    }
+  ],
+  "generation_mode": "prompt",
+  "question_type": "MCQ",
+  "num_questions": 5,
+  "id": 61,
+  "created_at": "2025-10-12 20:05:24",
+  "created_by": "teacher_001",
+  "is_published": 1
+}

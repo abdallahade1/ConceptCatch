@@ -5,7 +5,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import List
-import document_processing as dp
+from src import document_processing as dp
 import uuid
 from typing import Dict
 from langchain.memory import ConversationBufferMemory
@@ -143,25 +143,3 @@ def answer_followup_question(session_id, followup_question):
     result = chain.invoke({"followup_question": followup_question})
     
     return result['text']
-
-
-# === Intial Feature Running ===
-q = "Evaluate the integral: ∫₀¹ (3x² + 2x) dx"
-ans = "∫₀¹ (3x² + 2x) dx = [x³ + x²]₀¹ = 3"
-subject = "Calculus"
-# resource_txt  = dp.extract_text("file_path")
-fake_user_id = 243
-response = give_feedback(243, subject, q, ans)
-session_id = response[1]
-print(response[0])
-
-print("\nFollow-up 1")
-follow_q = "What integration rule used for this problem?"
-print(answer_followup_question(session_id, follow_q))
-print("\nFollowup 2")
-follow_q2 = "Generate Practice Questions"
-print(answer_followup_question(session_id, follow_q2))
-print("\nFollowup 3")
-follow_q3= "Generate 6 Practice Questions"
-print(answer_followup_question(session_id, follow_q3))
-
