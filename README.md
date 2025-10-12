@@ -93,15 +93,13 @@ I'm using LangChain memory to remember the question, the student's previous answ
 The AI explained that `ConversationBufferMemory` expects one input key and advised using an f-string instead of placeholder variables. This resolved the multi-input key error and enabled dynamic prompt generation.
 
 ### Example 2: Debugging Asynchronous API Initialization and Environment Configuration in FastAPI
-
-**Issue:** FastAPI backend failed to load Azure OpenAI credentials after modularizing routes into async handlers.
-
+**Prompt Used:**
+After modularizing our FastAPI app into multiple routers, the Azure OpenAI connection stopped working. We are using LangChain's AzureOpenAI class for model initialization.  When we start the server, we get: openai.error.AuthenticationError: No API key provided.
 **AI Solution:**  
 - Move `load_dotenv()` before app initialization.  
 - Implement lazy initialization with `@lru_cache` to load AzureOpenAI clients only when needed.  
 - Add a startup event to verify environment configuration.
 
----
 
 ## 📄 License
 This project is licensed under the MIT License.
