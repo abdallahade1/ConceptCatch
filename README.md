@@ -27,7 +27,7 @@
 - Automatic generation of detailed explanations.
 - Adaptive quizzes based on the student’s past mistakes for targeted practice.
 
-### 3. Mistake Analysis and Learning Path Optimization
+### 3. Mistake Analysis and Adaptive Practice
 **Core Capabilities:**
 - Label mistake types and aggregate them over time.
 - Identify recurring weakness points or misunderstood concepts.
@@ -35,16 +35,15 @@
 - Provide a teacher dashboard with detailed, exportable performance reports.
 
 
-
 ## Demo 
 [Demo Link](https://drive.google.com/file/d/1fUZwDrOLXzDQiIDmgqYKSsLbZQ2OSp6V/view?usp=sharing)
 
+
 ## Demonstration Video
-[Demonstration Video](https://drive.google.com/drive/folders/1lvuHRzAIKyeckyoDQPio73xL8vQrxgD9?usp=sharing)
+[Demonstration Video Link](https://drive.google.com/file/d/17HRXl-_0xe8-cT6_wVQjWxukU6SqyzOL/view?usp=sharing)
 
 
 ## Environment Setup
-
 ### Installations
 #### React (Frontend)
 ```bash
@@ -65,7 +64,6 @@ pip install openai langchain langchain-openai python-dotenv
 
 
 ## Running
-
 ### Frontend
 ```bash
 cd frontend
@@ -101,5 +99,5 @@ After modularizing our FastAPI app into multiple routers, the Azure OpenAI conne
 - Add a startup event to verify environment configuration.
 
 
-## 📄 License
-This project is licensed under the MIT License.
+## License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
