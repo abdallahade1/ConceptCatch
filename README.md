@@ -39,8 +39,8 @@
 [Demo Link](https://drive.google.com/file/d/1fUZwDrOLXzDQiIDmgqYKSsLbZQ2OSp6V/view?usp=sharing)
 
 
-## Demonstration Video
-[Demonstration Video Link](https://drive.google.com/file/d/17HRXl-_0xe8-cT6_wVQjWxukU6SqyzOL/view?usp=sharing)
+## Presentation Video
+[Presentation Video Link](https://drive.google.com/file/d/17HRXl-_0xe8-cT6_wVQjWxukU6SqyzOL/view?usp=sharing)
 
 
 ## Environment Setup
